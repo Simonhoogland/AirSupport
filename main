@@ -42,7 +42,9 @@ int main(void)
 	//Enable UART port
 	USART_Cmd(USART6, ENABLE);
 
-	void USART6_IRQHandler(void){}
+	void USART6_IRQHandler(void){
+	
+	}
 
 	uint16_t data = USARTx->DR;
 

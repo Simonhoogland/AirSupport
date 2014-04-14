@@ -3,13 +3,13 @@
 #include <stm32f4xx_gpio.h>
 #include <stm32f4xx_rcc.h>
 #include <misc.h>
- 
+
 int main(void)
 {
     //Enable clock of pints & UART
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC , ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART6, ENABLE);
-    
+
     //setup GPIO
     GPIO_InitTypeDef GPIO_struct;
     GPIO_struct.GPIO_Pin   = GPIO_Pin_6 | GPIO_Pin_7;
@@ -21,7 +21,7 @@ int main(void)
     //Do pin-assignment
     GPIO_PinAFConfig(GPIOC, GPIO_PinSource6, GPIO_AF_USART6);
     GPIO_PinAFConfig(GPIOC, GPIO_PinSource7, GPIO_AF_USART6);
-    
+
     // Setup UART
     USART_InitTypeDef UART_struct;
     UART_struct.USART_BaudRate            = 57600;
@@ -31,10 +31,10 @@ int main(void)
     UART_struct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
     UART_struct.USART_Mode                = USART_Mode_Tx | USART_Mode_Rx;
     USART_Init(USART6, &UART_struct);
-    
+
     // Enable Interrupt
     USART_ITConfig(USART6, USART_IT_RXNE, ENABLE);
-    
+
     // Init interrupt
     NVIC_InitTypeDef NVIC_struct;
     NVIC_struct.NVIC_IRQChannel                   = USART6_IRQn;
@@ -42,21 +42,21 @@ int main(void)
     NVIC_struct.NVIC_IRQChannelPreemptionPriority = 0;
     NVIC_struct.NVIC_IRQChannelSubPriority        = 0;
     NVIC_Init(&NVIC_struct);
-    
+
     //Enable UART port
     USART_Cmd(USART6, ENABLE);
-    
+
     void USART6_IRQHandler(void){
 
     }
 
-    uint16_t data = USARTx->DR;
+    uint16_t data = USART1->DR;
 
-    while (USART_GetFlagStatus(USARTx, USART_FLAG_TC) == RESET);
+    while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET);
 
-    USART_SendData (USARTx, data);
+    USART_SendData (USART1, data);
     while(1)
     {
-        USART_puts(USART6, "Hello\n");
+
     }
 }

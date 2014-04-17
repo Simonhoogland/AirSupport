@@ -50,13 +50,12 @@ int main(void)
 
     }
 
-    uint16_t data = USART1->DR;
-
-    while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET);
-
-    USART_SendData (USART1, data);
     while(1)
     {
+    	uint16_t data = USART1->DR;
 
+    	while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET);
+
+    	USART_SendData (USART1, data);
     }
 }

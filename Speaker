@@ -1,0 +1,69 @@
+// Code for speaker on STM32F4 Discovery Board 
+// Group H, Year 2, E-technology, HVA
+// 17-04-14
+
+#include “stm32f4xx_rcc.h”
+#include “stm32f4xx_gpio.h”
+#include “stm32f4xx_spi.h”
+#include “stm32f4xx_i2c.h”
+
+// Clock configurations 
+
+RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOB | RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_GPIOD, ENABLE);	// GPIOA (I2S_WS signal), GPIOB (I2C_SDA & I2S_SCL), GPIOC (I2S_MCK, I2S_SCK, I2S_SD) and GPIOD (Reset pin on CS43L22)
+
+RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1 | RCC_APB1Periph_SPI3, ENABLE);	// SPI3 & I2C1 enable serial peripherals 
+
+RCC_PLLI2SCmd(ENABLE);	// I2S enable for accurate standard audio sampling frequencies
+
+// Pin configurations
+
+GPIO_InitTypeDef PinInitStruct; 
+PinInitStruct.GPIO_Pin = GPIO_Pin_4; 
+PinInitStruct.GPIO_Mode = GPIO_Mode_OUT; 
+PinInitStruct.GPIO_OType = GPIO_OType_PP; 
+PinInitStruct.GPIO_PuPd = GPIO_PuPd_DOWN; 
+PinInitStruct.GPIO_Speed = GPIO_Speed_50MHz; 
+ 
+GPIO_Init(GPIOD, &PinInitStruct);
+
+GPIO_PinAFConfig(GPIOA, GPIO_PinSource4, GPIO_AF_SPI3); //connecting pin 4 of port A to the SPI3 peripheral
+
+// I2S configurations
+
+I2S_InitTypeDef I2S_InitType;
+I2S_InitType.I2S_AudioFreq = I2S_AudioFreq_48k;
+I2S_InitType.I2S_MCLKOutput = I2S_MCLKOutput_Enable;
+I2S_InitType.I2S_Mode = I2S_Mode_MasterTx;
+I2S_InitType.I2S_DataFormat = I2S_DataFormat_16b;
+I2S_InitType.I2S_Standard = I2S_Standard_Phillips;
+I2S_InitType.I2S_CPOL = I2S_CPOL_Low;
+ 
+I2S_Init(SPI3, &I2S_InitType);
+
+I2S_Cmd(SPI3, ENABLE);
+
+// I2C initialization and connecting to the CS43L22
+
+// I2S module configuration
+
+I2C_InitType.I2C_ClockSpeed = 100000;
+I2C_InitType.I2C_Mode = I2C_Mode_I2C;
+I2C_InitType.I2C_OwnAddress1 = 99;
+I2C_InitType.I2C_Ack = I2C_Ack_Enable;
+I2C_InitType.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
+I2C_InitType.I2C_DutyCycle = I2C_DutyCycle_2;
+
+I2C_Init(I2C1, &I2C_InitType);   	// Initialize the I2C peripheral ...
+I2C_Cmd(I2C1, ENABLE);          	// ... and turn it on
+
+// DAC configuration
+
+GPIO_SetBits(GPIOD, GPIO_Pin_4);	// Turn on by bringing the reset signal high
+
+// Fill transmit buffer of SPI3 peripheral with desired data
+
+SPI_I2S_SendData(SPI3, theData);
+
+// Check if transmit buffer is empty
+
+SPI_I2S_GetFlagStatus(SPI3, SPI_I2S_FLAG_TXE);

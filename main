@@ -12,21 +12,21 @@ volatile char received_string[MAX_STRLEN+1];
 
 void USART_puts(USART_TypeDef* USARTx, volatile char *s){
 
-	while(*s){
-		// wait until data register is empty
-		while( !(USARTx->SR & 0x00000040) );
-		USART_SendData(USARTx, *s);
-		*s++;
-	}
+    while(*s){
+        // wait until data register is empty
+	while( !(USARTx->SR & 0x00000040) );
+	USART_SendData(USARTx, *s);
+	*s++;
+    }
 }
 
 void InitUsart1(void) {
-	GPIO_InitTypeDef GPIO_InitStruct; // this is for the GPIO pins used as TX and RX
-	USART_InitTypeDef USART_InitStruct; // this is for the USART1 initilization
-	NVIC_InitTypeDef NVIC_InitStructure; // this is used to configure the NVIC (nested vector interrupt controller)
+    GPIO_InitTypeDef GPIO_InitStruct; // this is for the GPIO pins used as TX and RX
+    USART_InitTypeDef USART_InitStruct; // this is for the USART1 initilization
+    NVIC_InitTypeDef NVIC_InitStructure; // this is used to configure the NVIC (nested vector interrupt controller)
 
 
-	//Enable clock of pints & UART
+    //Enable clock of pints & UART
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB , ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
 
@@ -66,9 +66,9 @@ void InitUsart1(void) {
 
 void InitUsart6(void) {
 
-	GPIO_InitTypeDef GPIO_InitStruct;
-	USART_InitTypeDef USART_InitStruct;
-	NVIC_InitTypeDef NVIC_InitStructure;
+    GPIO_InitTypeDef GPIO_InitStruct;
+    USART_InitTypeDef USART_InitStruct;
+    NVIC_InitTypeDef NVIC_InitStructure;
 
     //Enable clock of pints & UART
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC , ENABLE);
@@ -111,8 +111,8 @@ void InitUsart6(void) {
 
 int main(void)
 {
-	InitUsart1();
-	InitUsart6();
+    InitUsart1();
+    InitUsart6();
 
     USART_puts(USART1, "Hello World!\r\n");
     USART_puts(USART1, "***********************************\r\n");
@@ -127,38 +127,38 @@ int main(void)
 }
 
 void USART1_IRQHandler(void){
-	if( USART_GetITStatus(USART1, USART_IT_RXNE) ){
+    if( USART_GetITStatus(USART1, USART_IT_RXNE) ){
 
-		static uint8_t cnt = 0; // this counter is used to determine the string length
-		char t = USART1->DR; // the character from the USART1 data register is saved in t
+	static uint8_t cnt = 0; // this counter is used to determine the string length
+	char t = USART1->DR; // the character from the USART1 data register is saved in t
 
-		/* check if the received character is not the LF character (used to determine end of string)
-		 * or the if the maximum string length has been been reached
-		 */
-		if( (t != '\n') && (cnt < MAX_STRLEN) ){
-			received_string[cnt] = t;
-			cnt++;
-		}
-		else{ // otherwise reset the character counter and print the received string
-			cnt = 0;
-			USART_puts(USART1, received_string);
-		}
+	/* check if the received character is not the LF character (used to determine end of string)
+	 * or the if the maximum string length has been been reached
+	 */
+	if( (t != '\n') && (cnt < MAX_STRLEN) ){
+            received_string[cnt] = t;
+	    cnt++;
 	}
+	else{ // otherwise reset the character counter and print the received string
+	    cnt = 0;
+	    USART_puts(USART1, received_string);
+	}
+    }
 }
 
 void USART6_IRQHandler(void){
-	if( USART_GetITStatus(USART6, USART_IT_RXNE) ){
+    if( USART_GetITStatus(USART6, USART_IT_RXNE) ){
 
-		static uint8_t cnt = 0;
-		char data = USART6->DR;
+	static uint8_t cnt = 0;
+	char data = USART6->DR;
 
-		if( (data != '\n') && (cnt < MAX_STRLENSEND) ){
-			send_string[cnt] = data;
-			cnt++;
-		}
-		else{
-			cnt = 0;
-			USART_puts(USART6, send_string);
-		}
+	if( (data != '\n') && (cnt < MAX_STRLENSEND) ){
+	    send_string[cnt] = data;
+	    cnt++;
 	}
+	else{
+	    cnt = 0;
+	    USART_puts(USART6, send_string);
+	}
+    }
 }

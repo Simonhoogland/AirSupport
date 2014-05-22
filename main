@@ -227,12 +227,12 @@ void USART1_IRQHandler(void){
 	if( USART_GetITStatus(USART1, USART_IT_RXNE) ){
 
 		//static uint8_t cnt = 0;
-		char data = USART1->DR;
+		uint16_t data = USART1->DR;
 
 		mavlink_message_t msg;
 		mavlink_status_t status;
 		USART_puts(USART1, "status11111");
-		if (mavlink_parse_char(MAVLINK_COMM_3, data, &msg, &status)) {
+		if (mavlink_parse_char(MAVLINK_COMM_0, data, &msg, &status)) {
 			USART_puts(USART1, "status222222");
 			decodeMAVlinkMsg(&msg);
 		}
